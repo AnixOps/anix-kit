@@ -11,6 +11,8 @@ version in their `go.mod`.
 | --- | --- |
 | `sign` | Ed25519 signing and verification in the AnixOps format: base64 raw public keys, base64 detached signatures, PKCS#8 PEM private keys, 16-hex public key ids |
 | `cmd/anixsign` | Command line for the same format (keygen, pub, id, digest, sign, verify): `go run github.com/AnixOps/anix-kit/cmd/anixsign@<version>` |
+| `update` | The signed update feed every AnixOps updater reads (format `anixops-appcast-v1`, first shipped by AnixOps Net for macOS): envelope, feed and archive signatures, replay and downgrade checks, choosing the newest item |
+| `cmd/anixupdate` | Release-side command for the feed (item, feed, verify): `go run github.com/AnixOps/anix-kit/cmd/anixupdate@<version>` |
 
 Reusable GitHub workflows live in `.github/workflows` and are called with
 `uses: AnixOps/anix-kit/.github/workflows/<file>@<ref>`:
