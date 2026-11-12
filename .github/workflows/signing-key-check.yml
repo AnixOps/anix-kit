@@ -1,0 +1,55 @@
+name: Signing Key Check
+
+# Reusable: proves, without releasing anything, that the signing secrets are
+# a working Ed25519 pair (and, when given, that the public key is the one the
+# caller ships). Prints only the public key id. Call it before a release and
+# after a key rotation:
+#
+#   jobs:
+#     key:
+#       uses: AnixOps/anix-kit/.github/workflows/signing-key-check.yml@main
+#       with:
+#         expected_public_key: <base64 raw key the product trusts>
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      expected_public_key:
+        description: Base64 raw public key the caller trusts; empty skips the comparison
+        type: string
+        default: ''
+    secrets:
+      ANIXOPS_PLUGIN_SIGNING_PRIVATE_KEY:
+        required: true
+      ANIXOPS_PLUGIN_OFFICIAL_PUBLIC_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Signing Key Check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Sign and verify with the key pair
+        env:
+          PRIVATE_KEY: ${{ secrets.ANIXOPS_PLUGIN_SIGNING_PRIVATE_KEY }}
+          PUBLIC_KEY: ${{ secrets.ANIXOPS_PLUGIN_OFFICIAL_PUBLIC_KEY }}
+          EXPECTED: ${{ inputs.expected_public_key }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          work="$(mktemp -d)"; trap 'rm -rf "${work}"' EXIT; chmod 0700 "${work}"
+          [[ "$(printf '%s' "${PUBLIC_KEY}" | base64 -d | wc -c | tr -d ' ')" == 32 ]] || { echo "the public key secret is not base64 of 32 raw bytes" >&2; exit 1; }
+          [[ -z "${EXPECTED}" || "${EXPECTED}" == "${PUBLIC_KEY}" ]] || { echo "the public key secret is not the key the caller trusts" >&2; exit 1; }
+          printf '%s\n' "${PRIVATE_KEY}" >"${work}/key.pem"; chmod 0600 "${work}/key.pem"; unset PRIVATE_KEY
+          derived="$(openssl pkey -in "${work}/key.pem" -pubout -outform DER | tail -c 32 | base64 | tr -d '\n')"
+          [[ "${derived}" == "${PUBLIC_KEY}" ]] || { echo "the private key does not belong to the public key secret" >&2; exit 1; }
+          { printf '\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00'; printf '%s' "${PUBLIC_KEY}" | base64 -d; } >"${work}/pub.der"
+          head -c 64 /dev/urandom >"${work}/msg"
+          openssl pkeyutl -sign -inkey "${work}/key.pem" -rawin -in "${work}/msg" -out "${work}/msg.sig"
+          openssl pkeyutl -verify -pubin -keyform DER -inkey "${work}/pub.der" -rawin -in "${work}/msg" -sigfile "${work}/msg.sig" >/dev/null
+          echo "Signing key check passed (public key id $(printf '%s' "${PUBLIC_KEY}" | base64 -d | sha256sum | cut -c1-16))."

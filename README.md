@@ -10,10 +10,12 @@ version in their `go.mod`.
 | Package | What it does |
 | --- | --- |
 | `sign` | Ed25519 signing and verification in the AnixOps format: base64 raw public keys, base64 detached signatures, PKCS#8 PEM private keys, 16-hex public key ids |
-| `cmd/anixsign` | Command line for the same format (keygen, pub, id, sign, verify) |
+| `cmd/anixsign` | Command line for the same format (keygen, pub, id, digest, sign, verify): `go run github.com/AnixOps/anix-kit/cmd/anixsign@<version>` |
 
 Reusable GitHub workflows live in `.github/workflows` and are called with
-`uses: AnixOps/anix-kit/.github/workflows/<file>@<ref>`.
+`uses: AnixOps/anix-kit/.github/workflows/<file>@<ref>`:
+
+- `signing-key-check.yml`: checks that the signing secrets are a working pair (and the key the caller trusts).
 
 Commercial-only code (licenses, quota guards) lives in the private
 `anix-commercial-kit`, never here.
