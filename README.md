@@ -13,6 +13,7 @@ version in their `go.mod`.
 | `cmd/anixsign` | Command line for the same format (keygen, pub, id, digest, sign, verify): `go run github.com/AnixOps/anix-kit/cmd/anixsign@<version>` |
 | `update` | The signed update feed every AnixOps updater reads (format `anixops-appcast-v1`, first shipped by AnixOps Net for macOS): envelope, feed and archive signatures, replay and downgrade checks, choosing the newest item |
 | `cmd/anixupdate` | Release-side command for the feed (item, feed, verify): `go run github.com/AnixOps/anix-kit/cmd/anixupdate@<version>` |
+| `redact` | Removes personal data (URLs, e-mail, IPs, UUIDs, key-like tokens, host names, home directory and account name) from crash reports, diagnostics and logs; the same rules as the AnixOps Net client, checked against shared vectors in `redact/testdata/vectors.json` |
 
 Reusable GitHub workflows live in `.github/workflows` and are called with
 `uses: AnixOps/anix-kit/.github/workflows/<file>@<ref>`:

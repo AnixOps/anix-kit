@@ -1,0 +1,33 @@
+{
+  "comment": "Input and expected output of the AnixOps redaction rule set (package redact, anixops-net crates/client-health). Every implementation checks itself against these.",
+  "redact": [
+    {
+      "in": "failed to fetch https://sub.example.com/api/v1/client/subscribe?token=abc123 from node hk.example.net:443 (203.0.113.7:8443, [2001:db8::1]:443) for a@b.cn key=Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MA== id 3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      "out": "failed to fetch <url> from node <host> (<ip>, <ip>) for <email> <secret> id <id>"
+    },
+    {
+      "in": "panicked at crates/client-health/src/lib.rs:42:7:\nindex out of bounds\n   3: std::panicking::begin_panic::h1a2b3c4d5e6f7a8b\n   4: core::fmt::write",
+      "out": "panicked at crates/client-health/src/lib.rs:42:7:\nindex out of bounds\n   3: std::panicking::begin_panic::h1a2b3c4d5e6f7a8b\n   4: core::fmt::write"
+    },
+    {
+      "in": "connection reset after 1500 ms; version 0.3.0-beta.4",
+      "out": "connection reset after 1500 ms; version 0.3.0-beta.4"
+    },
+    {
+      "in": "fetch https://panel.example.com/sub?token=secret failed for node 198.51.100.4",
+      "out": "fetch <url> failed for node <ip>"
+    },
+    {
+      "in": "connect to hk.example.net.",
+      "out": "connect to <host>."
+    },
+    {
+      "in": "see main.swift and config.json",
+      "out": "see main.swift and config.json"
+    },
+    {
+      "in": "ip 2001:db8::1 down",
+      "out": "ip <ip> down"
+    }
+  ]
+}
